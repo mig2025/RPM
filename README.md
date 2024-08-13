@@ -31,3 +31,14 @@ nginx-mod-http-xslt-filter-1.26.1-1.fc39.x86_64..> 13-Aug-2024 08:55            
 nginx-mod-mail-1.26.1-1.fc39.x86_64.rpm            13-Aug-2024 08:55               55036
 
 nginx-mod-stream-1.26.1-1.fc39.x86_64.rpm          13-Aug-2024 08:55               89642
+
+Создается репозиторий otus.repo
+----
+добаление пакета -> wget https://repo.percona.com/yum/percona-release-latest.noarch.rpm
+
+проверка
+----
+ yum list | grep otus
+
+ yum install -y percona-release.noarch
+

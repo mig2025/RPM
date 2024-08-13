@@ -10,4 +10,13 @@
   ansible.builtin.shell: rpmbuild -ba nginx.spec -D 'debug_package %{nil}'
   args:
    chdir: /root/rpmbuild/SPECS
+
+- name: Add Text
+  ansible.builtin.shell: |
+    echo "[otus]
+    name=otus-linux
+    baseurl=http://localhost/repo
+    gpgcheck=0 
+    enabled=1" | tee -a /etc/yum.repos.d/otus.repo
+    yum repolist enabled
 ...

@@ -94,4 +94,20 @@
   ansible.builtin.service:
     name: nginx
     state: reloaded
+
+- name: Create outus.repo
+  ansible.builtin.file:
+    path: /etc/yum.repos.d/otus.repo
+    state: touch
+  notify: Add Text
+  tags: otus_repo
+
+- name: Add pkg to repo
+  ansible.builtin.shell: |
+    wget https://repo.percona.com/yum/percona-release-latest.noarch.rpm
+    createrepo /usr/share/nginx/html/repo/
+    yum makecache
+  args:
+   chdir: /usr/share/nginx/html/repo/
+  tags: pkg_to_repopercona-release
 ...
