@@ -9,6 +9,9 @@ Vagrant.configure("2") do |config|
       vb.memory = "1024"
       vb.cpus = 1
     end
-   
+    server.vm.provision "ansible" do |ansible|
+       ansible.verbose = "v"
+       ansible.playbook = "haupt.yml"
+   end
   end
 end
