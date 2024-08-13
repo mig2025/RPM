@@ -1,0 +1,97 @@
+---
+- name: Install Pakete
+  ansible.builtin.yum:
+    pkg:
+      - wget 
+      - rpmdevtools 
+      - rpm-build 
+      - createrepo
+      - yum-utils 
+      - cmake 
+      - gcc 
+      - git
+    state: latest
+
+- name: Create folder
+  ansible.builtin.file:
+    path:  /root/rpm
+    owner: root
+    group: root
+    state: directory
+
+- name: Nginx Source
+  ansible.builtin.shell: | 
+   yumdownloader --source nginx
+   rpm -Uvh nginx*.src.rpm
+   yum-builddep -y nginx
+  args:
+   chdir: /root/rpm
+
+- name: Download Brotli
+  ansible.builtin.shell: git clone --recurse-submodules -j8 https://github.com/google/ngx_brotli
+  args:
+   chdir: /root
+
+- name: Create folder
+  ansible.builtin.file:
+    path: /root/ngx_brotli/deps/brotli/out
+    owner: root
+    group: root
+    state: directory
+  notify: Build brotli
+
+- name: Delete nginx.spec
+  ansible.builtin.file:
+    path: /root/rpmbuild/SPECS/nginx.spec
+    state: absent
+
+- name: Create nginx.spec
+  ansible.builtin.template:
+    src: ./templates/nginx.j2
+    dest: /root/rpmbuild/SPECS/nginx.spec
+
+- name: Create RPM Pkg
+  ansible.builtin.shell: rpmbuild -ba nginx.spec -D 'debug_package %{nil}'
+  args:
+   chdir: /root/rpmbuild/SPECS
+
+- name: Install Nginx
+  ansible.builtin.shell: |
+    yum localinstall -y *.rpm
+    systemctl start nginx
+  args:
+   chdir: /root/rpmbuild/RPMS/x86_64
+
+- name: Copy rpms
+  ansible.builtin.shell: |
+    cp ~/rpmbuild/RPMS/noarch/* ~/rpmbuild/RPMS/x86_64/
+  tags: 
+   - Copy rpms
+
+- name: Create repo folder
+  ansible.builtin.file:
+    path:  /usr/share/nginx/html/repo/
+    state: directory
+  tags: create_repo
+
+- name: Copy rpms to repo
+  ansible.builtin.shell: | 
+    cp /root/rpmbuild/RPMS/x86_64/*.rpm /usr/share/nginx/html/repo
+    createrepo /usr/share/nginx/html/repo/
+  tags: copy_rpms
+
+- name: Delete nginx.conf
+  ansible.builtin.file:
+    path: /etc/nginx/nginx.conf
+    state: absent
+
+- name: Create nginx.conf
+  ansible.builtin.template:
+    src: ./templates/nginx.conf.j2
+    dest: /etc/nginx/nginx.conf
+
+- name: Reload nginx
+  ansible.builtin.service:
+    name: nginx
+    state: reloaded
+...

@@ -1,0 +1,7 @@
+---
+- name: Create Repository
+  hosts: all
+  become: true
+  roles:
+   - role: pkg_install
+...
