@@ -1,9 +1,9 @@
 Размещаем свой RPM в своем репозитории
 ----
 Рабочее место-> Fedora/40, Virtual Box 7, Visual Code, Ansible
-----
 
 Собирается рпм пакет Nginx-Brotli
+----
 
 проверка -> http://localhost:8080/repo/
 
